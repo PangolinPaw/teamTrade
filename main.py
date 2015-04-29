@@ -22,10 +22,16 @@ systemData = 0
 # Name & location of file full of commodity data.
 filename = 'trade_data.txt'
 # UP/DOWNLOAD URL GOES HERE
+URL = ''
 
 def version():
-        # Version info & eventually help text/instructions. Currently unused.
-        versionNotes = """ 
+        # Version info & eventually help text/instructions.
+        versionNotes = """VERSION HISTORY 
+---------------
+v0.3
+- Added cascade menu ribbon and associated functions.
+- Marked 'work in progress' areas of the code with capitalised comments.
+
 v0.2:
 - Improved dictionary format.
 - Minor adjustment to UI window grid to accomodate scroll bars.
@@ -36,8 +42,22 @@ v0.1:
 
 		helpText = """ 
 Don't Panic."""
-        return [versionNotes, helpText]
+		source = "https://github.com/PangolinPaw/teamTrade"
+
+        return [versionNotes, helpText, source]
         
+def showVersion():
+		versionDetail = version()[0]
+		print versionDetail
+
+def showInstructions():
+		instructions - version()[1]
+		print instructions
+
+def showSource():
+	sourceURL = version()[2]
+	print "This tool is open source & the code can be viewed on\n%s" % sourceURL
+
 
 def downloadData():
 		# Retrieve trade data from shared source & store in a list for use by the program
@@ -65,7 +85,7 @@ def downloadData():
 
 
 def UI():
-	# Produce Main GUI window & load data
+	# Produce Main GUI window
 
 	downloadData() # Update local list of system data with the shared copy
 
@@ -73,6 +93,8 @@ def UI():
 	mainWindow = Tk()
 	mainWindow.protocol('WM_DELETE_WINDOW', clean_exit) # Save data when window is closed	
 	mainWindow.title("Team Trade")
+
+	mainWindow.config(menu=UImenu()) # Add menu accross the top
 
 	# Window layout:
 
@@ -157,11 +179,49 @@ def UI():
 	# OPEN WINDOW
 	mainWindow.mainloop() # Display window
 
+def UImenu():
+	# Create & control menu items accross the top of the window
+	menubar = Menu(mainWindow)
+
+	# File menu
+	fileMenu = Menu(menubar, tearoff=0)
+	fileMenu.add_command(label="Upload data", command=uploadData)
+	fileMenu.add_command(label="Download data", command=downloadData)
+	fileMenu.add_separator()
+	fileMenu.add_command(label="Exit", command=clean_exit)
+	menubar.add_cascade(label="File", menu=fileMenu)
+
+	# Settings menu
+	settingsMenu = Menu(menubar, tearoff=0)
+	settingsMenu.add_command(label="Change upload URL", command=changeURL)
+	menubar.add_cascade(label="Settings", menu=settingsMenu)
+
+	# Info menu
+	infoenu = Menu(menubar, tearoff=0)
+	infoMenu.add_command(label="User instructions", command=showInstructions)
+	infoMenu.add_command(label="Version history", command=showVersion)
+	infoMenu.add_command(label="View source", command=showSource)
+	menubar.add_cascade(label="Info", menu=infoMenu)
+
+	return menubar
+
+
 def clean_exit():
         # Safely close window. Eventually the upload code will also go in here.
         saveData(systemData)
         print 'Data saved'
+        uploadData()
         mainWindow.destroy()
+
+def changeURL():
+	# Change up/download URL (can be set to a local direcotry)
+	global URL
+	pass
+
+
+def uploadData():
+	# Upload contents of trade data file to predefined URL
+	pass
 
 def saveChange():
         # Save currently displayed commodities to the list (only uploaded when program exits)
@@ -195,7 +255,8 @@ def saveData(tradeData):
         for line in tradeData:
                 saveFile.write("%s\n" % line) # Each station is saved on a new line
         saveFile.close
-        # UPLOAD CODE GOES HERE
+        uploadData()
+
 
 def showCommodities(station):
         # Show applicable commodity data for selected station
