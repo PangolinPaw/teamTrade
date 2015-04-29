@@ -17,19 +17,11 @@ mainWindow = 0 # Global window variable so it can be opened & closed from differ
 # Global list of systems & commodities to save having to pass their contents around:
 systemListBox = 0 
 commodity = 0
+systemData = 0
 
+# Name & location of file full of commodity data.
 filename = 'trade_data.txt'
-
-# Dictionary of test commodity data for each station (High Supply = +3, High Demand = -3):
-systemData = [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
-              ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
-              ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
-              ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
-              ['System 4 - Station E', ['Gold=-1', 'Silver=1', 'Bronze=0', 'Uranium=-2']],
-              ['System 5 - Station F', ['Gold=-2', 'Silver=0', 'Bronze=1', 'Uranium=-1']],
-              ['System 5 - Station G', ['Gold=-3', 'Silver=-1', 'Bronze=2', 'Uranium=0']],
-              ['System 5 - Station H', ['Gold=-2', 'Silver=-2', 'Bronze=3', 'Uranium=1']]
-              ]
+# UP/DOWNLOAD URL GOES HERE
 
 def version():
         # Version info & eventually help text/instructions. Currently unused.
@@ -41,10 +33,42 @@ v0.2:
 v0.1:
 - Basic UI built.
 - Title and versioning system set."""
-        return versionNotes
+
+		helpText = """ 
+Don't Panic."""
+        return [versionNotes, helpText]
+        
+
+def downloadData():
+		# Retrieve trade data from shared source & store in a list for use by the program
+		global systemData
+
+		# DOWNLOAD CODE GOES HERE
+
+		if os.path.exists(): # Check if the trade data file exists (if not, it is created when the program is closed)
+				loadFile = open(filename, 'r')
+				fileLines = loadFile.Readlines()
+				for line in fileLines:
+						systemData.append(line) # Save file contents to list
+				loadFile.close()
+		else:
+		# No trade data found, insert test data (High Supply = +3, High Demand = -3):
+				systemData = [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
+            				  ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
+            				  ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
+            				  ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
+            				  ['System 4 - Station E', ['Gold=-1', 'Silver=1', 'Bronze=0', 'Uranium=-2']],
+            				  ['System 5 - Station F', ['Gold=-2', 'Silver=0', 'Bronze=1', 'Uranium=-1']],
+            				  ['System 5 - Station G', ['Gold=-3', 'Silver=-1', 'Bronze=2', 'Uranium=0']],
+            				  ['System 5 - Station H', ['Gold=-2', 'Silver=-2', 'Bronze=3', 'Uranium=1']]
+            				  ]
+
 
 def UI():
-	# Produce Main GUI window & receive user input (filepath)"
+	# Produce Main GUI window & load data
+
+	downloadData() # Update local list of system data with the shared copy
+
 	global mainWindow
 	mainWindow = Tk()
 	mainWindow.protocol('WM_DELETE_WINDOW', clean_exit) # Save data when window is closed	
@@ -68,7 +92,7 @@ def UI():
 	# R0, C1:
 	
 	# R0, C2:
-        # systemListBox scroll bar
+    # systemListBox scroll bar
 	scrollBarS = Scrollbar(mainWindow, orient=VERTICAL)
 	scrollBarS.grid(row=0, column=2, pady=4, sticky=NS)
 	# Link scroll bar to list box
@@ -92,7 +116,7 @@ def UI():
 
 	# R1, C0:
 	# Add system & station button
-	addSystemButton = Button(mainWindow,text="Add", width=7, command=addStation)
+	addSystemButton = Button(mainWindow,text="Add", width=7, command=lambda: addStation(systemData[systemListBox.curselection()[0]][0]))
 	addSystemButton.grid(row=1, column=0, padx=2, sticky=E)
 
 	# R1, C1:
@@ -140,13 +164,13 @@ def clean_exit():
         mainWindow.destroy()
 
 def saveChange():
-        # Save currently displayed commodities to the list
+        # Save currently displayed commodities to the list (only uploaded when program exits)
         global commodity
-        systemData[systemListBox.curselection()[0]][1] = []
+        systemData[systemListBox.curselection()[0]][1] = [] # Fetch from 'commodity' list the selected station's data
         for line in commodity.get(1.0,'end-1c').splitlines():
                 # Loop through textbox contents
                 name, info = line.split("		")
-                
+                # Convert user-fiendly supply/demand names back to integers
                 if info == "(HS)":
                         info = 3
                 if info == "(MS)":
@@ -166,11 +190,12 @@ def saveChange():
         
 
 def saveData(tradeData):
-        # Save data to file (& eventualy upload it)
+        # Save data to file & upload it
         saveFile = open(filename, 'w', 0)
         for line in tradeData:
-                saveFile.write("%s\n" % line)
+                saveFile.write("%s\n" % line) # Each station is saved on a new line
         saveFile.close
+        # UPLOAD CODE GOES HERE
 
 def showCommodities(station):
         # Show applicable commodity data for selected station
@@ -178,6 +203,7 @@ def showCommodities(station):
         commodityData = systemData[systemListBox.curselection()[0]][1]
         for item in commodityData:
                 name, info = item.split('=')
+                # Convert integer values into user-freindly supply/demand names
                 info = int(info)
                 if info == 3:
                         info = "HS"
@@ -193,15 +219,16 @@ def showCommodities(station):
                         info = "MD"
                 if info == -3:
                         info = "HD"
+                # Add commodity to the end of the list
                 commodity.insert(END, "%s		(%s)\n" % (name, info))
 
-def addStation():
+def addStation(station):
         # Add new system/station to list
-	pass
+	print "Add '%s'" % station # PLACEHOLDER
 
 def delStation(station):
         # Delete system/station from list
-        print "Delte '%s'" % station
+        print "Delete '%s'" % station # PLACEHOLDER
 
 
 if __name__ == '__main__':
