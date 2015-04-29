@@ -1,11 +1,8 @@
 # --------------------------------
-# TRADE DATA TOOL
+# + + T E A M  T R A D E + +
 # --------------------------------
-# NOTES:
-# ListBoxes seem to be a good way to display Systems & Stations.
-# Need to find a way to trigger a function when a ListBox item is
-# selected so that the commodity data is displayed.
-
+# https://github.com/PangolinPaw/teamTrade
+# 
 from Tkinter import *   # Used for the GUI interface
 import tkMessageBox
 import ttk
@@ -26,23 +23,56 @@ URL = ''
 
 def version():
         # Version info & eventually help text/instructions.
+        source = "https://github.com/PangolinPaw/teamTrade"
+
         versionNotes = """VERSION HISTORY 
 ---------------
+v0.4
+- Add help text and usage instructions.
+- Add functional Delete Station feature
+
 v0.3
-- Added cascade menu ribbon and associated functions.
-- Marked 'work in progress' areas of the code with capitalised comments.
+- Add cascade menu ribbon and associated functions.
+- Mark 'work in progress' areas of the code with capitalised comments.
 
 v0.2:
-- Improved dictionary format.
+- Improve dictionary format.
 - Minor adjustment to UI window grid to accomodate scroll bars.
 
 v0.1:
-- Basic UI built.
-- Title and versioning system set."""
+- Build basic UI.
+- Set title and versioning system."""
 
 		helpText = """ 
-Don't Panic."""
-		source = "https://github.com/PangolinPaw/teamTrade"
+Don't Panic.
+
+Introduction
+------------
+This is tool designed to store and share trade data from the Elite: Dangerous game.
+
+My intention is to produce an application that's the middle ground between offline note-taking tools and the crowdsource Elite Dangerous Data Network apps that are available.
+
+The idea is that you and a few friends will each use this tool and have each copy pointed towards a common online source. This will allow you each to record market supply and demand data and automatically make the information available amongst yourselves without making your valuable trade routes public knowledge.
+
+Usage
+------------
+Adding Data:
+When you visit a new station's commodity market, add it's details using the Add button on the left of this tool's window.
+
+Select the newly added station to view it's commodity supply and demand (which won't contain any useful data yet). Mark each commodity with the supply or demand level from the in-game commodity market and press the Save button.
+
+Sharing Data:
+When you close the program or select 'Upload data' from the File menu, the Team Trade application will try to send your locally stored data to an external source. On each subsequent run of the program, data is then imported from this source.
+
+You can set this source via the 'Change Upload URL' option in the Settings menu. You are responsible for finding and maintaining this external file hosting and for sharing the URL with other users of the Team Trade tool which which you want to share collaborative market data.
+
+Team Trade can be used in offline mode by setting the Upload URL to a local direcotry on your PC.
+
+Feedback
+------------
+Feedback and bug reports are very welcome. Please submit these via the project's GitHub repo:
+
+%s""" % (source)
 
         return [versionNotes, helpText, source]
         
@@ -56,7 +86,7 @@ def showInstructions():
 
 def showSource():
 	sourceURL = version()[2]
-	print "This tool is open source & the code can be viewed on\n%s" % sourceURL
+	print "This tool is open source & the code can be viewed at\n%s" % sourceURL
 
 
 def downloadData():
@@ -143,7 +173,7 @@ def UI():
 
 	# R1, C1:
 	# Delete system & station button
-	delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemData[systemListBox.curselection()[0]][0]))
+	delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemData[systemListBox.curselection()[0]]))
 	delSystemButton.grid(row=1, column=1, padx=2, sticky=W)
 
 	# R1, C2:
@@ -287,9 +317,17 @@ def addStation(station):
         # Add new system/station to list
 	print "Add '%s'" % station # PLACEHOLDER
 
-def delStation(station):
+def delStation(index):
         # Delete system/station from list
-        print "Delete '%s'" % station # PLACEHOLDER
+        global systemData
+        confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData(index))
+        selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
+        if selection = 'yes':
+        		systemData.delete(index)
+        		print "Delte '%s'" % (systemData(index)) 
+        else:
+        		print "'%s' Was not deleted" % (systemData(index))
+
 
 
 if __name__ == '__main__':
