@@ -8,13 +8,16 @@ import tkMessageBox
 import ttk
 import os       # Used for loading & saving files
 import sys      # For safely exiting the program
+import pickle   # To save & load data to .txt files
 
 mainWindow = 0 # Global window variable so it can be opened & closed from different modules
 
 # Global list of systems & commodities to save having to pass their contents around:
 systemListBox = 0 
 commodity = 0
-systemData = 0
+systemData = []
+
+defaultComm = ['Gold=0', 'Silver=0', 'Bronze=0', 'Uranium=0']
 
 # Name & location of file full of commodity data.
 filename = 'trade_data.txt'
@@ -27,6 +30,11 @@ def version():
 
         versionNotes = """VERSION HISTORY 
 ---------------
+V0.5
+- Replaced 'file' saving system with 'pickle' system for easier retrieval
+- Add funtional Add Station feature that uses placeholder names
+- Bug fixes
+
 v0.4
 - Add help text and usage instructions.
 - Add functional Delete Station feature
@@ -43,7 +51,7 @@ v0.1:
 - Build basic UI.
 - Set title and versioning system."""
 
-		helpText = """ 
+        helpText = """ 
 Don't Panic.
 
 Introduction
@@ -78,15 +86,15 @@ Feedback and bug reports are very welcome. Please submit these via the project's
         
 def showVersion():
 		versionDetail = version()[0]
-		print versionDetail
+		print "\n%s" % versionDetail
 
 def showInstructions():
-		instructions - version()[1]
-		print instructions
+		instructions = version()[1]
+		print "\n%s" % instructions
 
 def showSource():
 	sourceURL = version()[2]
-	print "This tool is open source & the code can be viewed at\n%s" % sourceURL
+	print "\nThis tool is open source & the code can be viewed at\n%s" % sourceURL
 
 
 def downloadData():
@@ -95,11 +103,9 @@ def downloadData():
 
 		# DOWNLOAD CODE GOES HERE
 
-		if os.path.exists(): # Check if the trade data file exists (if not, it is created when the program is closed)
+		if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
 				loadFile = open(filename, 'r')
-				fileLines = loadFile.Readlines()
-				for line in fileLines:
-						systemData.append(line) # Save file contents to list
+				systemData= pickle.load(loadFile)
 				loadFile.close()
 		else:
 		# No trade data found, insert test data (High Supply = +3, High Demand = -3):
@@ -130,16 +136,7 @@ def UI():
 
 	# ROW 0, COLUMN 0:
 	# System & station list
-	global systemListBox
-	systemListBox = Listbox(mainWindow, height=10, width=20)
-	itemcount = 0
-	for line in systemData:
-		itemcount = itemcount +1
-		systemListBox.insert(itemcount, line[0])
-	systemListBox.grid(row=0, column=0, columnspan=2, padx=5, pady=4, sticky=NS)
-
-	# Update displayed commodities once an item in the listbox is selected:
-	systemListBox.bind('<<ListboxSelect>>', showCommodities)
+	updateSystems()
 
 	# R0, C1:
 	
@@ -168,12 +165,12 @@ def UI():
 
 	# R1, C0:
 	# Add system & station button
-	addSystemButton = Button(mainWindow,text="Add", width=7, command=lambda: addStation(systemData[systemListBox.curselection()[0]][0]))
+	addSystemButton = Button(mainWindow,text="Add", width=7, command=lambda: addStation())
 	addSystemButton.grid(row=1, column=0, padx=2, sticky=E)
 
 	# R1, C1:
 	# Delete system & station button
-	delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemData[systemListBox.curselection()[0]]))
+	delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemListBox.curselection()[0]))
 	delSystemButton.grid(row=1, column=1, padx=2, sticky=W)
 
 	# R1, C2:
@@ -209,6 +206,17 @@ def UI():
 	# OPEN WINDOW
 	mainWindow.mainloop() # Display window
 
+def updateSystems():
+	global systemListBox
+	systemListBox = Listbox(mainWindow, height=10, width=20)
+	itemcount = 0
+	for line in systemData:
+		itemcount = itemcount +1
+		systemListBox.insert(itemcount, line[0])
+	systemListBox.grid(row=0, column=0, columnspan=2, padx=5, pady=4, sticky=NS)
+	# Update displayed commodities once an item in the listbox is selected:
+	systemListBox.bind('<<ListboxSelect>>', showCommodities)
+
 def UImenu():
 	# Create & control menu items accross the top of the window
 	menubar = Menu(mainWindow)
@@ -227,7 +235,7 @@ def UImenu():
 	menubar.add_cascade(label="Settings", menu=settingsMenu)
 
 	# Info menu
-	infoenu = Menu(menubar, tearoff=0)
+	infoMenu = Menu(menubar, tearoff=0)
 	infoMenu.add_command(label="User instructions", command=showInstructions)
 	infoMenu.add_command(label="Version history", command=showVersion)
 	infoMenu.add_command(label="View source", command=showSource)
@@ -239,8 +247,6 @@ def UImenu():
 def clean_exit():
         # Safely close window. Eventually the upload code will also go in here.
         saveData(systemData)
-        print 'Data saved'
-        uploadData()
         mainWindow.destroy()
 
 def changeURL():
@@ -251,6 +257,7 @@ def changeURL():
 
 def uploadData():
 	# Upload contents of trade data file to predefined URL
+	print 'Upload data'
 	pass
 
 def saveChange():
@@ -275,15 +282,14 @@ def saveChange():
                         info = -2
                 if info == "(HD)":
                         info = -3
-                print "%s=%s" % (name, info)
                 systemData[systemListBox.curselection()[0]][1].append("%s=%s" % (name, info))
+        print "Save data"
         
 
 def saveData(tradeData):
         # Save data to file & upload it
         saveFile = open(filename, 'w', 0)
-        for line in tradeData:
-                saveFile.write("%s\n" % line) # Each station is saved on a new line
+        pickle.dump(tradeData, saveFile) # Each station is saved on a new line
         saveFile.close
         uploadData()
 
@@ -313,20 +319,24 @@ def showCommodities(station):
                 # Add commodity to the end of the list
                 commodity.insert(END, "%s		(%s)\n" % (name, info))
 
-def addStation(station):
+def addStation():
         # Add new system/station to list
-	print "Add '%s'" % station # PLACEHOLDER
+        global systemData
+        station = "System %s - Station %s" % (len(systemData), len(systemData) +1) # PLACEHOLDER
+        systemData.append([station, defaultComm])
+        updateSystems()
+        print "Add '%s'" % station 
 
 def delStation(index):
         # Delete system/station from list
         global systemData
-        confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData(index))
+        confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData[index][0])
         selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
-        if selection = 'yes':
-        		systemData.delete(index)
-        		print "Delte '%s'" % (systemData(index)) 
+        if selection == 'yes':
+        		del systemData[index]
+        		updateSystems()
         else:
-        		print "'%s' Was not deleted" % (systemData(index))
+        		print "'%s' Was not deleted" % (systemData[index][0])
 
 
 
