@@ -1,62 +1,50 @@
 (lp0
 (lp1
-S'System 1 - Station A'
+S'Lovaroju - Vinge Hub'
 p2
 a(lp3
-VGold=0
+VGold=1
 p4
-aVSilver=1
+aVSilver=2
 p5
 aVBronze=-2
 p6
-aVUranium=-1
+aVUranium=-3
 p7
 aaa(lp8
-S'System 3 - Station 4'
+S'Lugh - Balandin Gateway'
 p9
 a(lp10
-VGold=2
+VGold=-3
 p11
-aVSilver=0
+aVSilver=3
 p12
-aVBronze=2
+aVBronze=0
 p13
 aVUranium=2
 p14
 aaa(lp15
-S'System 4 - Station 5'
+S'Eravate - Ackerman Market'
 p16
 a(lp17
 VGold=0
 p18
-aVSilver=0
+aVSilver=3
 p19
-aVBronze=0
+aVBronze=-3
 p20
-aVUranium=0
+aVUranium=2
 p21
 aaa(lp22
-S'System 5 - Station 6'
+S'Eravate - Cleve Hub'
 p23
 a(lp24
 VGold=-2
 p25
-aVSilver=-1
+aVSilver=-2
 p26
-aVBronze=2
+aVBronze=-2
 p27
 aVUranium=1
 p28
-aaa(lp29
-S'Eravate - Cleve Hub'
-p30
-a(lp31
-VGold=0
-p32
-aVSilver=3
-p33
-aVBronze=1
-p34
-aVUranium=-2
-p35
 aaa.

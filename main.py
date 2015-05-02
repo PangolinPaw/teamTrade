@@ -17,6 +17,7 @@ stationInput = 0
 # Global list of systems & commodities to save having to pass their contents around:
 systemListBox = 0 
 commodity = 0
+trades = 0
 systemData = []
 
 defaultComm = ['Gold=0', 'Silver=0', 'Bronze=0', 'Uranium=0']
@@ -28,10 +29,14 @@ URL = ''
 
 def version():
         # Version info & eventually help text/instructions.
-        source = "https://github.com/PangolinPaw/teamTrade"
+        source = "http://pangolinpaw.github.io/teamTrade/"
 
         versionNotes = """VERSION HISTORY 
 ---------------
+v0.6
+- Basic Suggested Trade Route functionality added
+- Alphabetised System list attempted, but a bug prevented implementation
+
 v0.5.1
 - Removed placeholder code from Add Station function & replaced with proper input window
 
@@ -90,12 +95,12 @@ Feedback and bug reports are very welcome. Please submit these via the project's
         return [versionNotes, helpText, source]
         
 def showVersion():
-		versionDetail = version()[0]
-		print "\n%s" % versionDetail
+        versionDetail = version()[0]
+        print "\n%s" % versionDetail
 
 def showInstructions():
-		instructions = version()[1]
-		print "\n%s" % instructions
+        instructions = version()[1]
+        print "\n%s" % instructions
 
 def showSource():
 	sourceURL = version()[2]
@@ -103,26 +108,26 @@ def showSource():
 
 
 def downloadData():
-		# Retrieve trade data from shared source & store in a list for use by the program
-		global systemData
+	# Retrieve trade data from shared source & store in a list for use by the program
+	global systemData
 
-		# DOWNLOAD CODE GOES HERE
+	# DOWNLOAD CODE GOES HERE
 
-		if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
-				loadFile = open(filename, 'r')
-				systemData= pickle.load(loadFile)
-				loadFile.close()
-		else:
-		# No trade data found, insert test data (High Supply = +3, High Demand = -3):
-				systemData = [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
-            				  ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
-            				  ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
-            				  ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
-            				  ['System 4 - Station E', ['Gold=-1', 'Silver=1', 'Bronze=0', 'Uranium=-2']],
-            				  ['System 5 - Station F', ['Gold=-2', 'Silver=0', 'Bronze=1', 'Uranium=-1']],
-            				  ['System 5 - Station G', ['Gold=-3', 'Silver=-1', 'Bronze=2', 'Uranium=0']],
-            				  ['System 5 - Station H', ['Gold=-2', 'Silver=-2', 'Bronze=3', 'Uranium=1']]
-            				  ]
+	if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
+		loadFile = open(filename, 'r')
+		systemData= pickle.load(loadFile)
+		loadFile.close()
+	else:
+	# No trade data found, insert test data (High Supply = +3, High Demand = -3):
+		systemData =    [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
+                                ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
+                                ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
+                                ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
+                                ['System 4 - Station E', ['Gold=-1', 'Silver=1', 'Bronze=0', 'Uranium=-2']],
+                                ['System 5 - Station F', ['Gold=-2', 'Silver=0', 'Bronze=1', 'Uranium=-1']],
+                                ['System 5 - Station G', ['Gold=-3', 'Silver=-1', 'Bronze=2', 'Uranium=0']],
+                                ['System 5 - Station H', ['Gold=-2', 'Silver=-2', 'Bronze=3', 'Uranium=1']]
+                                ]
 
 
 def UI():
@@ -146,7 +151,7 @@ def UI():
 	# R0, C1:
 	
 	# R0, C2:
-    # systemListBox scroll bar
+	# systemListBox scroll bar
 	scrollBarS = Scrollbar(mainWindow, orient=VERTICAL)
 	scrollBarS.grid(row=0, column=2, pady=4, sticky=NS)
 	# Link scroll bar to list box
@@ -156,7 +161,7 @@ def UI():
 	# R0, C3
 	#Commodity list
 	global commodity
-	commodity = Text(mainWindow, height=20, width=35)
+	commodity = Text(mainWindow, height=35, width=45)
 	commodity.grid(row=0, rowspan=3, column=3, padx=5, pady=8)
 	commodity.insert(END,"Commodity Data")
 
@@ -182,9 +187,11 @@ def UI():
 
 	# R2, C0:
 	# Suggested trades list
-	tradeListBox = Listbox(mainWindow, height=6, width=20)
+	global trades
+	trades = Listbox(mainWindow, height=10, width=35)
 	itemcount = 0
-	tradeListBox.grid(row=2, column=0, columnspan=2, padx=5, pady=2)
+	trades.grid(row=2, column=0, columnspan=2, padx=5, pady=2)
+	#trades.insert(END, "Suggested Trades")
 
 	# R2, C1:
 
@@ -213,11 +220,22 @@ def UI():
 
 def updateSystems():
 	global systemListBox
-	systemListBox = Listbox(mainWindow, height=10, width=20)
+	systemListBox = Listbox(mainWindow, height=15, width=35)
 	itemcount = 0
 	for line in systemData:
 		itemcount = itemcount +1
-		systemListBox.insert(itemcount, line[0])
+		systemListBox.insert(END, line[0])
+
+	# Sorting the systemList causes the systems to become out-of-sync with the selection system...
+	# Sort contents
+	#temp_list = list(systemListBox.get(0,END))
+	#temp_list.sort(key=str.lower)
+	# delete contents of present listbox
+	#systemListBox.delete(0,END)
+	# load listbox with sorted data
+	#for item in temp_list:
+	#	systemListBox.insert(END, item)
+
 	systemListBox.grid(row=0, column=0, columnspan=2, padx=5, pady=4, sticky=NS)
 	# Update displayed commodities once an item in the listbox is selected:
 	systemListBox.bind('<<ListboxSelect>>', showCommodities)
@@ -257,13 +275,13 @@ def clean_exit():
 def changeURL():
 	# Change up/download URL (can be set to a local direcotry)
 	global URL
-	pass
-
+	print '[Error]: Change URL function has not yet been implemented.'
+	
 
 def uploadData():
 	# Upload contents of trade data file to predefined URL
-	print 'Upload data'
-	pass
+	print '[Error]: Upload data function has not yet been implemented.'
+	
 
 def saveChange():
         # Save currently displayed commodities to the list (only uploaded when program exits)
@@ -323,6 +341,7 @@ def showCommodities(station):
                         info = "HD"
                 # Add commodity to the end of the list
                 commodity.insert(END, "%s		(%s)\n" % (name, info))
+        showTrades(systemData[systemListBox.curselection()[0]][1])
 
 def addStation():
         # Add new system/station to list
@@ -365,6 +384,33 @@ def delStation(index):
         		del systemData[index]
         		updateSystems()
 
+def showTrades(localData):
+        # Recieves commodity list for local station & displays potential destinations
+        global trades
+        trades.delete(0,END)
+        for localProduct in localData:
+                # Loop through selected station's commodities
+                localComm = localProduct.split('=')
+                localName = localComm[0]
+                localVal = int(localComm[1])
+                if localVal != 0: # Only do the following loops if the commodity is actually locally available
+                        for station in systemData:
+                                # Loop through all other stations
+                                for distantProduct in station[1]:
+                                        # Loop through that station's commodities
+                                        distantComm = distantProduct.split('=')
+                                        distantName = distantComm[0]
+                                        distantVal = int(distantComm[1])
+
+                                        if localName == distantName:
+                                                if localVal < 0:
+                                                        if distantVal > 1:
+                                                                trades.insert(END, '%s From %s' % (localName, station[0]))
+                                                if localVal > 0:
+                                                        if distantVal < -1:
+                                                                trades.insert(END, '%s To %s' % (localName, station[0]))
+
+        
 
 if __name__ == '__main__':
 	UI()
