@@ -12,55 +12,51 @@ p6
 aVUranium=-1
 p7
 aaa(lp8
-S'System 5 - Station G'
+S'System 3 - Station 4'
 p9
 a(lp10
-VGold=3
+VGold=2
 p11
 aVSilver=0
 p12
-aVBronze=0
+aVBronze=2
 p13
-aVUranium=0
+aVUranium=2
 p14
 aaa(lp15
-S'System 3 - Station 4'
+S'System 4 - Station 5'
 p16
 a(lp17
-VGold=2
+VGold=0
 p18
 aVSilver=0
 p19
-aVBronze=2
+aVBronze=0
 p20
-aVUranium=2
+aVUranium=0
 p21
 aaa(lp22
-S'System 4 - Station 5'
+S'System 5 - Station 6'
 p23
 a(lp24
-S'Gold=0'
+VGold=-2
 p25
-aS'Silver=0'
+aVSilver=-1
 p26
-aS'Bronze=0'
+aVBronze=2
 p27
-aS'Uranium=0'
+aVUranium=1
 p28
 aaa(lp29
-S'System 6 - Station 7'
+S'Eravate - Cleve Hub'
 p30
 a(lp31
 VGold=0
 p32
-aVSilver=0
+aVSilver=3
 p33
-aVBronze=3
+aVBronze=1
 p34
-aVUranium=0
+aVUranium=-2
 p35
-aaa(lp36
-S'System 5 - Station 6'
-p37
-ag24
-aa.
+aaa.
