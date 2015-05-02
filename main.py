@@ -10,7 +10,9 @@ import os       # Used for loading & saving files
 import sys      # For safely exiting the program
 import pickle   # To save & load data to .txt files
 
-mainWindow = 0 # Global window variable so it can be opened & closed from different modules
+# Global window variables so they can be opened & closed from different modules:
+mainWindow = 0 
+stationInput = 0
 
 # Global list of systems & commodities to save having to pass their contents around:
 systemListBox = 0 
@@ -30,7 +32,10 @@ def version():
 
         versionNotes = """VERSION HISTORY 
 ---------------
-V0.5
+v0.5.1
+- Removed placeholder code from Add Station function & replaced with proper input window
+
+v0.5
 - Replaced 'file' saving system with 'pickle' system for easier retrieval
 - Add funtional Add Station feature that uses placeholder names
 - Bug fixes
@@ -132,7 +137,7 @@ def UI():
 
 	mainWindow.config(menu=UImenu()) # Add menu accross the top
 
-	# Window layout:
+	# WINDOW LAYOUT
 
 	# ROW 0, COLUMN 0:
 	# System & station list
@@ -322,10 +327,34 @@ def showCommodities(station):
 def addStation():
         # Add new system/station to list
         global systemData
-        station = "System %s - Station %s" % (len(systemData), len(systemData) +1) # PLACEHOLDER
-        systemData.append([station, defaultComm])
+        global stationInput
+
+        # Create input dialogue:
+        stationInput = Tk()
+        stationInput.title("New Station")
+        # Text:
+        Label(stationInput, text="Please enter new Station details below.").grid(row=0, column=0, columnspan=2)
+        Label(stationInput, text="System: ").grid(row=1, column=0)
+        Label(stationInput, text="Station: ").grid(row=2, column=0)
+        # Data entry text boxes:
+        sysEntry = Entry(stationInput)
+        staEntry = Entry(stationInput)
+        sysEntry.grid(row=1, column=1)
+        staEntry.grid(row=2, column=1)
+        # Button:
+        submitButton = Button(stationInput, text="Add", width=10, command=lambda: updateStationList([sysEntry.get(), staEntry.get()]))
+        submitButton.grid(row=3, column=1, pady=4, padx=8, sticky=E)
+        # Start focus on entry box & set Enter to trigger button's function
+        sysEntry.focus_force()
+        stationInput.bind('<Return>', (lambda event: updateStationList([sysEntry.get(), staEntry.get()])))
+        
+        mainloop()     
+
+
+def updateStationList(details):
+        systemData.append(["%s - %s" % (details[0], details[1]), defaultComm])
         updateSystems()
-        print "Add '%s'" % station 
+        stationInput.destroy()
 
 def delStation(index):
         # Delete system/station from list
@@ -335,9 +364,6 @@ def delStation(index):
         if selection == 'yes':
         		del systemData[index]
         		updateSystems()
-        else:
-        		print "'%s' Was not deleted" % (systemData[index][0])
-
 
 
 if __name__ == '__main__':
