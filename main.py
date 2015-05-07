@@ -226,7 +226,7 @@ def updateSystems():
     global systemData
 
     # Sort contents of systemList into System alphabetical order
-    systemData.sort(key=str.lower)
+    systemData.sort()
 
     # Add the systems to the list box & display
     systemListBox = Listbox(mainWindow, height=15, width=35)
