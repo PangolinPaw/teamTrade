@@ -33,21 +33,24 @@ def version():
 
         versionNotes = """VERSION HISTORY 
 ---------------
+v0.6.1
+- Implement alphabetised System list.
+
 v0.6
-- Basic Suggested Trade Route functionality added
-- Alphabetised System list attempted, but a bug prevented implementation
+- Add basic Suggested Trade Route functionality.
+- Alphabetised System list attempted, but a bug prevented implementation.
 
 v0.5.1
-- Removed placeholder code from Add Station function & replaced with proper input window
+- Remove placeholder code from Add Station function & replace with proper input window.
 
 v0.5
-- Replaced 'file' saving system with 'pickle' system for easier retrieval
-- Add funtional Add Station feature that uses placeholder names
-- Bug fixes
+- Replace 'file' saving system with 'pickle' system for easier retrieval.
+- Add funtional Add Station feature that uses placeholder names.
+- Bug fixes.
 
 v0.4
 - Add help text and usage instructions.
-- Add functional Delete Station feature
+- Add functional Delete Station feature.
 
 v0.3
 - Add cascade menu ribbon and associated functions.
@@ -103,23 +106,23 @@ def showInstructions():
         print "\n%s" % instructions
 
 def showSource():
-	sourceURL = version()[2]
-	print "\nThis tool is open source & the code can be viewed at\n%s" % sourceURL
+    sourceURL = version()[2]
+    print "\nThis tool is open source & the code can be viewed at\n%s" % sourceURL
 
 
 def downloadData():
-	# Retrieve trade data from shared source & store in a list for use by the program
-	global systemData
+    # Retrieve trade data from shared source & store in a list for use by the program
+    global systemData
 
-	# DOWNLOAD CODE GOES HERE
+    # DOWNLOAD CODE GOES HERE
 
-	if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
-		loadFile = open(filename, 'r')
-		systemData= pickle.load(loadFile)
-		loadFile.close()
-	else:
-	# No trade data found, insert test data (High Supply = +3, High Demand = -3):
-		systemData =    [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
+    if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
+        loadFile = open(filename, 'r')
+        systemData= pickle.load(loadFile)
+        loadFile.close()
+    else:
+    # No trade data found, insert test data (High Supply = +3, High Demand = -3):
+        systemData =    [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
                                 ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
                                 ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
                                 ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
@@ -131,140 +134,134 @@ def downloadData():
 
 
 def UI():
-	# Produce Main GUI window
+    # Produce Main GUI window
 
-	downloadData() # Update local list of system data with the shared copy
+    downloadData() # Update local list of system data with the shared copy
 
-	global mainWindow
-	mainWindow = Tk()
-	mainWindow.protocol('WM_DELETE_WINDOW', clean_exit) # Save data when window is closed	
-	mainWindow.title("Team Trade")
+    global mainWindow
+    mainWindow = Tk()
+    mainWindow.protocol('WM_DELETE_WINDOW', clean_exit) # Save data when window is closed   
+    mainWindow.title("Team Trade")
 
-	mainWindow.config(menu=UImenu()) # Add menu accross the top
+    mainWindow.config(menu=UImenu()) # Add menu accross the top
 
-	# WINDOW LAYOUT
+    # WINDOW LAYOUT
 
-	# ROW 0, COLUMN 0:
-	# System & station list
-	updateSystems()
+    # ROW 0, COLUMN 0:
+    # System & station list
+    updateSystems()
 
-	# R0, C1:
-	
-	# R0, C2:
-	# systemListBox scroll bar
-	scrollBarS = Scrollbar(mainWindow, orient=VERTICAL)
-	scrollBarS.grid(row=0, column=2, pady=4, sticky=NS)
-	# Link scroll bar to list box
-	scrollBarS.configure(command=systemListBox.yview)
-	systemListBox.configure(yscrollcommand=scrollBarS.set)
+    # R0, C1:
+    
+    # R0, C2:
+    # systemListBox scroll bar
+    scrollBarS = Scrollbar(mainWindow, orient=VERTICAL)
+    scrollBarS.grid(row=0, column=2, pady=4, sticky=NS)
+    # Link scroll bar to list box
+    scrollBarS.configure(command=systemListBox.yview)
+    systemListBox.configure(yscrollcommand=scrollBarS.set)
 
-	# R0, C3
-	#Commodity list
-	global commodity
-	commodity = Text(mainWindow, height=35, width=45)
-	commodity.grid(row=0, rowspan=3, column=3, padx=5, pady=8)
-	commodity.insert(END,"Commodity Data")
+    # R0, C3
+    #Commodity list
+    global commodity
+    commodity = Text(mainWindow, height=35, width=45)
+    commodity.grid(row=0, rowspan=3, column=3, padx=5, pady=8)
+    commodity.insert(END,"Commodity Data")
 
-	# R0, C4:
-	# Commodity scroll bar
-	scrollBarC = Scrollbar(mainWindow, orient=VERTICAL)
-	scrollBarC.grid(row=0, column=4, pady=8, rowspan=3, sticky=NS)
-	# Link scroll bar to list box
-	scrollBarC.configure(command=commodity.yview)
-	commodity.configure(yscrollcommand=scrollBarC.set)
+    # R0, C4:
+    # Commodity scroll bar
+    scrollBarC = Scrollbar(mainWindow, orient=VERTICAL)
+    scrollBarC.grid(row=0, column=4, pady=8, rowspan=3, sticky=NS)
+    # Link scroll bar to list box
+    scrollBarC.configure(command=commodity.yview)
+    commodity.configure(yscrollcommand=scrollBarC.set)
 
-	# R1, C0:
-	# Add system & station button
-	addSystemButton = Button(mainWindow,text="Add", width=7, command=lambda: addStation())
-	addSystemButton.grid(row=1, column=0, padx=2, sticky=E)
+    # R1, C0:
+    # Add system & station button
+    addSystemButton = Button(mainWindow,text="Add", width=7, command=lambda: addStation())
+    addSystemButton.grid(row=1, column=0, padx=2, sticky=E)
 
-	# R1, C1:
-	# Delete system & station button
-	delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemListBox.curselection()[0]))
-	delSystemButton.grid(row=1, column=1, padx=2, sticky=W)
+    # R1, C1:
+    # Delete system & station button
+    delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemListBox.curselection()[0]))
+    delSystemButton.grid(row=1, column=1, padx=2, sticky=W)
 
-	# R1, C2:
+    # R1, C2:
 
-	# R2, C0:
-	# Suggested trades list
-	global trades
-	trades = Listbox(mainWindow, height=10, width=35)
-	itemcount = 0
-	trades.grid(row=2, column=0, columnspan=2, padx=5, pady=2)
-	#trades.insert(END, "Suggested Trades")
+    # R2, C0:
+    # Suggested trades list
+    global trades
+    trades = Listbox(mainWindow, height=10, width=35)
+    itemcount = 0
+    trades.grid(row=2, column=0, columnspan=2, padx=5, pady=2)
+    #trades.insert(END, "Suggested Trades")
 
-	# R2, C1:
+    # R2, C1:
 
-	# R2, C2:
+    # R2, C2:
 
-	# R2, C3:
+    # R2, C3:
 
-	# R2, C4:
+    # R2, C4:
 
-	# R3, C0:
+    # R3, C0:
 
-	# R3, C1:
+    # R3, C1:
 
-	# R3, C2:
+    # R3, C2:
 
-	# R3, C3:
-	# Save button
-	saveButton = Button(mainWindow,text="Save", width=10, command=saveChange)
-	saveButton.grid(row=3, column=3, padx=2, pady=2, sticky=E)
+    # R3, C3:
+    # Save button
+    saveButton = Button(mainWindow,text="Save", width=10, command=saveChange)
+    saveButton.grid(row=3, column=3, padx=2, pady=2, sticky=E)
 
 
-	# R3, C4:
+    # R3, C4:
 
-	# OPEN WINDOW
-	mainWindow.mainloop() # Display window
+    # OPEN WINDOW
+    mainWindow.mainloop() # Display window
 
 def updateSystems():
-	global systemListBox
-	systemListBox = Listbox(mainWindow, height=15, width=35)
-	itemcount = 0
-	for line in systemData:
-		itemcount = itemcount +1
-		systemListBox.insert(END, line[0])
+    global systemListBox
+    global systemData
 
-	# Sorting the systemList causes the systems to become out-of-sync with the selection system...
-	# Sort contents
-	#temp_list = list(systemListBox.get(0,END))
-	#temp_list.sort(key=str.lower)
-	# delete contents of present listbox
-	#systemListBox.delete(0,END)
-	# load listbox with sorted data
-	#for item in temp_list:
-	#	systemListBox.insert(END, item)
+    # Sort contents of systemList into System alphabetical order
+    systemData.sort(key=str.lower)
 
-	systemListBox.grid(row=0, column=0, columnspan=2, padx=5, pady=4, sticky=NS)
-	# Update displayed commodities once an item in the listbox is selected:
-	systemListBox.bind('<<ListboxSelect>>', showCommodities)
+    # Add the systems to the list box & display
+    systemListBox = Listbox(mainWindow, height=15, width=35)
+    for line in systemData:
+        systemListBox.insert(END, line[0])
+
+    systemListBox.grid(row=0, column=0, columnspan=2, padx=5, pady=4, sticky=NS)
+    # Update displayed commodities once an item in the listbox is selected:
+    systemListBox.bind('<<ListboxSelect>>', showCommodities)
 
 def UImenu():
-	# Create & control menu items accross the top of the window
-	menubar = Menu(mainWindow)
+    # Create & control menu items accross the top of the window
+    menubar = Menu(mainWindow)
 
-	# File menu
-	fileMenu = Menu(menubar, tearoff=0)
-	fileMenu.add_command(label="Upload data", command=uploadData)
-	fileMenu.add_command(label="Download data", command=downloadData)
-	fileMenu.add_separator()
-	fileMenu.add_command(label="Exit", command=clean_exit)
-	menubar.add_cascade(label="File", menu=fileMenu)
+    # File menu
+    fileMenu = Menu(menubar, tearoff=0)
+    fileMenu.add_command(label="Upload data", command=uploadData)
+    fileMenu.add_command(label="Download data", command=downloadData)
+    fileMenu.add_separator()
+    fileMenu.add_command(label="Exit", command=clean_exit)
+    menubar.add_cascade(label="File", menu=fileMenu)
 
-	# Settings menu
-	settingsMenu = Menu(menubar, tearoff=0)
-	settingsMenu.add_command(label="Change upload URL", command=changeURL)
-	menubar.add_cascade(label="Settings", menu=settingsMenu)
+    # Settings menu
+    settingsMenu = Menu(menubar, tearoff=0)
+    settingsMenu.add_command(label="Change upload URL", command=changeURL)
+    menubar.add_cascade(label="Settings", menu=settingsMenu)
 
-	# Info menu
-	infoMenu = Menu(menubar, tearoff=0)
-	infoMenu.add_command(label="User instructions", command=showInstructions)
-	infoMenu.add_command(label="Version history", command=showVersion)
-	infoMenu.add_command(label="View source", command=showSource)
-	menubar.add_cascade(label="Info", menu=infoMenu)
+    # Info menu
+    infoMenu = Menu(menubar, tearoff=0)
+    infoMenu.add_command(label="User instructions", command=showInstructions)
+    infoMenu.add_command(label="Version history", command=showVersion)
+    infoMenu.add_command(label="View source", command=showSource)
+    menubar.add_cascade(label="Info", menu=infoMenu)
 
-	return menubar
+    return menubar
 
 
 def clean_exit():
@@ -273,15 +270,15 @@ def clean_exit():
         mainWindow.destroy()
 
 def changeURL():
-	# Change up/download URL (can be set to a local direcotry)
-	global URL
-	print '[Error]: Change URL function has not yet been implemented.'
-	
+    # Change up/download URL (can be set to a local direcotry)
+    global URL
+    print '[Error]: Change URL function has not yet been implemented.'
+    
 
 def uploadData():
-	# Upload contents of trade data file to predefined URL
-	print '[Error]: Upload data function has not yet been implemented.'
-	
+    # Upload contents of trade data file to predefined URL
+    print '[Error]: Upload data function has not yet been implemented.'
+    
 
 def saveChange():
         # Save currently displayed commodities to the list (only uploaded when program exits)
@@ -289,7 +286,7 @@ def saveChange():
         systemData[systemListBox.curselection()[0]][1] = [] # Fetch from 'commodity' list the selected station's data
         for line in commodity.get(1.0,'end-1c').splitlines():
                 # Loop through textbox contents
-                name, info = line.split("		")
+                name, info = line.split("       ")
                 # Convert user-fiendly supply/demand names back to integers
                 if info == "(HS)":
                         info = 3
@@ -340,7 +337,7 @@ def showCommodities(station):
                 if info == -3:
                         info = "HD"
                 # Add commodity to the end of the list
-                commodity.insert(END, "%s		(%s)\n" % (name, info))
+                commodity.insert(END, "%s       (%s)\n" % (name, info))
         showTrades(systemData[systemListBox.curselection()[0]][1])
 
 def addStation():
@@ -381,8 +378,8 @@ def delStation(index):
         confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData[index][0])
         selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
         if selection == 'yes':
-        		del systemData[index]
-        		updateSystems()
+                del systemData[index]
+                updateSystems()
 
 def showTrades(localData):
         # Recieves commodity list for local station & displays potential destinations
@@ -413,4 +410,4 @@ def showTrades(localData):
         
 
 if __name__ == '__main__':
-	UI()
+    UI()
