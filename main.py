@@ -13,14 +13,16 @@ import pickle   # To save & load data to .txt files
 # Global window variables so they can be opened & closed from different modules:
 mainWindow = 0 
 stationInput = 0
+contextMenu = 0
 
 # Global list of systems & commodities to save having to pass their contents around:
 systemListBox = 0 
 commodity = 0
 trades = 0
 systemData = []
+currentStationSelection = 0
 
-defaultComm = ['Gold=0', 'Silver=0', 'Bronze=0', 'Uranium=0']
+defaultComm = [u'Explosives=0', u'Hydrogen Fuel=0', u'Mineral Oil=0', u'Pesticides=0', u'Clothing=0', u'Consumer Tech.=0', u'Domestic App.=0', u'Algae=0', u'Animal Meat=0', u'Coffee=0', u'Fish=0', u'Food Cart.=0', u'Fruit & Veg=0', u'Grain=0', u'Synthetic Meat=0', u'Tea=0', u'Polymers=0', u'Semiconductor=0', u'Superconductor=0', u'Beer=0', u'Liquor=0', u'Narcotics=0', u'Tobacco=0', u'Wine=0', u'Atmospheric pr=0', u'Crop Harvester=0', u'Marine Equip.=0', u'Microbial Fur.=0', u'Mineral Ext.=0', u'Power Gen.=0', u'Water Purifier=0', u'Agri-Meds=0', u'Basic Meds=0', u'Combat Stab.=0', u'Perf. Enhance=0', u'Progenator C.=0', u'Aluminium=0', u'Beryllium=0', u'Cobalt=0', u'Copper=0', u'Gallium=0', u'Gold=0', u'Indium=0', u'Lithium=0', u'Palladium=0', u'Platinum=0', u'Silver=0', u'Tantalum=0', u'Titanium=0', u'Uranium=-0']
 
 # Name & location of file full of commodity data.
 filename = 'trade_data.txt'
@@ -33,6 +35,10 @@ def version():
 
         versionNotes = """VERSION HISTORY 
 ---------------
+v 0.7
+- Swap commodity text box for a list box
+- Add context-sensitive right click menu to change commodity supply/demand
+
 v0.6.1
 - Implement alphabetised System list.
 
@@ -80,7 +86,7 @@ Usage
 Adding Data:
 When you visit a new station's commodity market, add it's details using the Add button on the left of this tool's window.
 
-Select the newly added station to view it's commodity supply and demand (which won't contain any useful data yet). Mark each commodity with the supply or demand level from the in-game commodity market and press the Save button.
+Select the newly added station to view it's commodity supply and demand (which won't contain any useful data yet). Mark each commodity with the supply or demand level from the in-game commodity market using the right mouse button (data is automatically saved after each change).
 
 Sharing Data:
 When you close the program or select 'Upload data' from the File menu, the Team Trade application will try to send your locally stored data to an external source. On each subsequent run of the program, data is then imported from this source.
@@ -122,15 +128,7 @@ def downloadData():
         loadFile.close()
     else:
     # No trade data found, insert test data (High Supply = +3, High Demand = -3):
-        systemData =    [['System 1 - Station A', ['Gold=3', 'Silver=1', 'Bronze=-2', 'Uranium=0']],
-                                ['System 2 - Station B', ['Gold=2', 'Silver=2', 'Bronze=-3', 'Uranium=-1']],
-                                ['System 2 - Station C', ['Gold=1', 'Silver=3', 'Bronze=-2', 'Uranium=-2']],
-                                ['System 3 - Station D', ['Gold=0', 'Silver=2', 'Bronze=-1', 'Uranium=-3']],
-                                ['System 4 - Station E', ['Gold=-1', 'Silver=1', 'Bronze=0', 'Uranium=-2']],
-                                ['System 5 - Station F', ['Gold=-2', 'Silver=0', 'Bronze=1', 'Uranium=-1']],
-                                ['System 5 - Station G', ['Gold=-3', 'Silver=-1', 'Bronze=2', 'Uranium=0']],
-                                ['System 5 - Station H', ['Gold=-2', 'Silver=-2', 'Bronze=3', 'Uranium=1']]
-                                ]
+        systemData =    [['Placeholder System - Placeholder Station', defaultComm]]
 
 
 def UI():
@@ -144,6 +142,20 @@ def UI():
     mainWindow.title("Team Trade")
 
     mainWindow.config(menu=UImenu()) # Add menu accross the top
+
+    # Right-click menu for changing supply/demand status of a commodity
+    global contextMenu
+    contextMenu = Menu(mainWindow, tearoff=0)
+    contextMenu.add_command(label="High Supply", command= lambda: changeStatus('HS'))
+    contextMenu.add_command(label="Medium Supply", command= lambda: changeStatus('MS'))
+    contextMenu.add_command(label="Low Supply", command= lambda: changeStatus('LS'))
+    contextMenu.add_separator()
+    contextMenu.add_command(label="Not Available", command= lambda: changeStatus('--'))
+    contextMenu.add_separator()
+    contextMenu.add_command(label="Low Demand", command= lambda: changeStatus('LD'))
+    contextMenu.add_command(label="Medium Demand", command= lambda: changeStatus('MD'))
+    contextMenu.add_command(label="High Demand", command= lambda: changeStatus('HD'))
+    mainWindow.bind("<Button-3>", popup)
 
     # WINDOW LAYOUT
 
@@ -162,11 +174,11 @@ def UI():
     systemListBox.configure(yscrollcommand=scrollBarS.set)
 
     # R0, C3
-    #Commodity list
     global commodity
-    commodity = Text(mainWindow, height=35, width=45)
+    # Commodity list box
+    commodity = Listbox(mainWindow, height=35, width=45)
     commodity.grid(row=0, rowspan=3, column=3, padx=5, pady=8)
-    commodity.insert(END,"Commodity Data")
+    
 
     # R0, C4:
     # Commodity scroll bar
@@ -183,7 +195,7 @@ def UI():
 
     # R1, C1:
     # Delete system & station button
-    delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(systemListBox.curselection()[0]))
+    delSystemButton = Button(mainWindow,text="Remove", width=7, command= lambda: delStation(currentStationSelection))
     delSystemButton.grid(row=1, column=1, padx=2, sticky=W)
 
     # R1, C2:
@@ -283,10 +295,11 @@ def uploadData():
 def saveChange():
         # Save currently displayed commodities to the list (only uploaded when program exits)
         global commodity
-        systemData[systemListBox.curselection()[0]][1] = [] # Fetch from 'commodity' list the selected station's data
-        for line in commodity.get(1.0,'end-1c').splitlines():
+        systemData[currentStationSelection][1] = [] # Fetch from 'commodity' list the selected station's data
+        for line in commodity.get(0,END):
                 # Loop through textbox contents
                 name, info = line.split("       ")
+                
                 # Convert user-fiendly supply/demand names back to integers
                 if info == "(HS)":
                         info = 3
@@ -302,8 +315,7 @@ def saveChange():
                         info = -2
                 if info == "(HD)":
                         info = -3
-                systemData[systemListBox.curselection()[0]][1].append("%s=%s" % (name, info))
-        print "Save data"
+                systemData[currentStationSelection][1].append("%s=%s" % (name, info))
         
 
 def saveData(tradeData):
@@ -316,9 +328,15 @@ def saveData(tradeData):
 
 def showCommodities(station):
         # Show applicable commodity data for selected station
-        commodity.delete(1.0,END)
-        commodityData = systemData[systemListBox.curselection()[0]][1]
+        global currentStationSelection
+        currentStationSelection = systemListBox.curselection()[0]
+        
+        commodity.delete(0,END)
+        commodityData = systemData[currentStationSelection][1]
+
+        itemCount = 0
         for item in commodityData:
+                itemCount = itemCount +1
                 name, info = item.split('=')
                 # Convert integer values into user-freindly supply/demand names
                 info = int(info)
@@ -337,9 +355,22 @@ def showCommodities(station):
                 if info == -3:
                         info = "HD"
                 # Add commodity to the end of the list
-                commodity.insert(END, "%s       (%s)\n" % (name, info))
-        showTrades(systemData[systemListBox.curselection()[0]][1])
+                commodity.insert(END, "%s       (%s)" % (name, info))
 
+        showTrades(systemData[currentStationSelection][1])
+
+def popup(event):
+        # This lets the right click emnu pop up over the main window
+        contextMenu.tk_popup(event.x_root, event.y_root, 0)
+        
+def changeStatus(newStatus):
+        # Change supply/demand of selected commodity & save data
+        original = commodity.get(commodity.curselection()[0],None) # Get current selection text
+        originalName = original.split('       ')[0] # Discard all but the name
+        commodity.insert(commodity.curselection()[0], '%s       (%s)' % (originalName, newStatus)) # Insert original name with new status
+        commodity.delete(commodity.curselection()[0],last=None) # Delete old entry
+        saveChange()
+        
 def addStation():
         # Add new system/station to list
         global systemData

@@ -1,50 +1,418 @@
 (lp0
 (lp1
-S'Lovaroju - Vinge Hub'
+S'Eravate - Ackerman Market'
 p2
 a(lp3
-VGold=1
+VExplosives=0
 p4
-aVSilver=2
+aVHydrogen Fuel=0
 p5
-aVBronze=-2
+aVMineral Oil=0
 p6
-aVUranium=-3
+aVPesticides=0
 p7
-aaa(lp8
-S'Lugh - Balandin Gateway'
+aVClothing=0
+p8
+aVConsumer Tech.=0
 p9
-a(lp10
-VGold=-3
+aVDomestic App.=0
+p10
+aVAlgae=0
 p11
-aVSilver=3
+aVAnimal Meat=0
 p12
-aVBronze=0
+aVCoffee=0
 p13
-aVUranium=2
+aVFish=0
 p14
-aaa(lp15
-S'Eravate - Ackerman Market'
+aVFood Cart.=0
+p15
+aVFruit & Veg=0
 p16
-a(lp17
-VGold=0
+aVGrain=0
+p17
+aVSynthetic Meat=0
 p18
-aVSilver=3
+aVTea=0
 p19
-aVBronze=-3
+aVPolymers=0
 p20
-aVUranium=2
+aVSemiconductor=0
 p21
-aaa(lp22
-S'Eravate - Cleve Hub'
+aVSuperconductor=0
+p22
+aVBeer=0
 p23
-a(lp24
-VGold=-2
+aVLiquor=0
+p24
+aVNarcotics=0
 p25
-aVSilver=-2
+aVTobacco=0
 p26
-aVBronze=-2
+aVWine=0
 p27
-aVUranium=1
+aVAtmospheric pr=0
 p28
+aVCrop Harvester=0
+p29
+aVMarine Equip.=0
+p30
+aVMicrobial Fur.=0
+p31
+aVMineral Ext.=-3
+p32
+aVPower Gen.=-3
+p33
+aVWater Purifier=0
+p34
+aVAgri-Meds=0
+p35
+aVBasic Meds=-1
+p36
+aVCombat Stab.=0
+p37
+aVPerf. Enhance=0
+p38
+aVProgenator C.=0
+p39
+aVAluminium=0
+p40
+aVBeryllium=0
+p41
+aVCobalt=0
+p42
+aVCopper=3
+p43
+aVGallium=0
+p44
+aVGold=2
+p45
+aVIndium=2
+p46
+aVLithium=0
+p47
+aVPalladium=0
+p48
+aVPlatinum=0
+p49
+aVSilver=0
+p50
+aVTantalum=0
+p51
+aVTitanium=0
+p52
+aVUranium=0
+p53
+aaa(lp54
+S'Eravate - Cleve Hub'
+p55
+a(lp56
+VExplosives=-2
+p57
+aVHydrogen Fuel=0
+p58
+aVMineral Oil=0
+p59
+aVPesticides=0
+p60
+aVClothing=0
+p61
+aVConsumer Tech.=0
+p62
+aVDomestic App.=0
+p63
+aVAlgae=0
+p64
+aVAnimal Meat=-3
+p65
+aVCoffee=-2
+p66
+aVFish=0
+p67
+aVFood Cart.=0
+p68
+aVFruit & Veg=0
+p69
+aVGrain=0
+p70
+aVSynthetic Meat=0
+p71
+aVTea=0
+p72
+aVPolymers=0
+p73
+aVSemiconductor=0
+p74
+aVSuperconductor=0
+p75
+aVBeer=0
+p76
+aVLiquor=0
+p77
+aVNarcotics=0
+p78
+aVTobacco=0
+p79
+aVWine=0
+p80
+aVAtmospheric pr=0
+p81
+aVCrop Harvester=0
+p82
+aVMarine Equip.=0
+p83
+aVMicrobial Fur.=0
+p84
+aVMineral Ext.=0
+p85
+aVPower Gen.=0
+p86
+aVWater Purifier=0
+p87
+aVAgri-Meds=0
+p88
+aVBasic Meds=0
+p89
+aVCombat Stab.=0
+p90
+aVPerf. Enhance=0
+p91
+aVProgenator C.=0
+p92
+aVAluminium=0
+p93
+aVBeryllium=0
+p94
+aVCobalt=0
+p95
+aVCopper=0
+p96
+aVGallium=0
+p97
+aVGold=0
+p98
+aVIndium=0
+p99
+aVLithium=0
+p100
+aVPalladium=0
+p101
+aVPlatinum=0
+p102
+aVSilver=0
+p103
+aVTantalum=0
+p104
+aVTitanium=0
+p105
+aVUranium=0
+p106
+aaa(lp107
+S'Lovaroju - Vinge Hub'
+p108
+a(lp109
+VExplosives=0
+p110
+aVHydrogen Fuel=0
+p111
+aVMineral Oil=0
+p112
+aVPesticides=0
+p113
+aVClothing=0
+p114
+aVConsumer Tech.=0
+p115
+aVDomestic App.=0
+p116
+aVAlgae=0
+p117
+aVAnimal Meat=-1
+p118
+aVCoffee=0
+p119
+aVFish=0
+p120
+aVFood Cart.=0
+p121
+aVFruit & Veg=-3
+p122
+aVGrain=-2
+p123
+aVSynthetic Meat=0
+p124
+aVTea=0
+p125
+aVPolymers=0
+p126
+aVSemiconductor=0
+p127
+aVSuperconductor=0
+p128
+aVBeer=0
+p129
+aVLiquor=0
+p130
+aVNarcotics=0
+p131
+aVTobacco=0
+p132
+aVWine=0
+p133
+aVAtmospheric pr=3
+p134
+aVCrop Harvester=0
+p135
+aVMarine Equip.=0
+p136
+aVMicrobial Fur.=0
+p137
+aVMineral Ext.=0
+p138
+aVPower Gen.=2
+p139
+aVWater Purifier=0
+p140
+aVAgri-Meds=0
+p141
+aVBasic Meds=2
+p142
+aVCombat Stab.=0
+p143
+aVPerf. Enhance=0
+p144
+aVProgenator C.=0
+p145
+aVAluminium=0
+p146
+aVBeryllium=0
+p147
+aVCobalt=0
+p148
+aVCopper=0
+p149
+aVGallium=0
+p150
+aVGold=0
+p151
+aVIndium=0
+p152
+aVLithium=0
+p153
+aVPalladium=0
+p154
+aVPlatinum=0
+p155
+aVSilver=0
+p156
+aVTantalum=0
+p157
+aVTitanium=0
+p158
+aVUranium=0
+p159
+aaa(lp160
+S'Lugh - Balandin Gateway'
+p161
+a(lp162
+VExplosives=-2
+p163
+aVHydrogen Fuel=3
+p164
+aVMineral Oil=0
+p165
+aVPesticides=0
+p166
+aVClothing=0
+p167
+aVConsumer Tech.=0
+p168
+aVDomestic App.=0
+p169
+aVAlgae=0
+p170
+aVAnimal Meat=2
+p171
+aVCoffee=0
+p172
+aVFish=3
+p173
+aVFood Cart.=0
+p174
+aVFruit & Veg=1
+p175
+aVGrain=0
+p176
+aVSynthetic Meat=0
+p177
+aVTea=0
+p178
+aVPolymers=0
+p179
+aVSemiconductor=0
+p180
+aVSuperconductor=0
+p181
+aVBeer=0
+p182
+aVLiquor=0
+p183
+aVNarcotics=0
+p184
+aVTobacco=0
+p185
+aVWine=0
+p186
+aVAtmospheric pr=-1
+p187
+aVCrop Harvester=-3
+p188
+aVMarine Equip.=-2
+p189
+aVMicrobial Fur.=0
+p190
+aVMineral Ext.=0
+p191
+aVPower Gen.=0
+p192
+aVWater Purifier=0
+p193
+aVAgri-Meds=0
+p194
+aVBasic Meds=0
+p195
+aVCombat Stab.=0
+p196
+aVPerf. Enhance=0
+p197
+aVProgenator C.=0
+p198
+aVAluminium=0
+p199
+aVBeryllium=0
+p200
+aVCobalt=0
+p201
+aVCopper=0
+p202
+aVGallium=0
+p203
+aVGold=0
+p204
+aVIndium=0
+p205
+aVLithium=0
+p206
+aVPalladium=0
+p207
+aVPlatinum=0
+p208
+aVSilver=0
+p209
+aVTantalum=0
+p210
+aVTitanium=0
+p211
+aVUranium=0
+p212
 aaa.
