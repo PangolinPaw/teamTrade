@@ -9,13 +9,17 @@ import ttk
 import os       # Used for loading & saving files
 import sys      # For safely exiting the program
 import pickle   # To save & load data to .txt files
+
 # For saving data online:
 import dropbox
+client = 0 # Globally available dropbox client details
+
 
 # Global window variables so they can be opened & closed from different modules:
 mainWindow = 0 
 stationInput = 0
 APIinput = 0
+APIauth = 0
 contextMenu = 0
 
 # Global list of systems & commodities to save having to pass their contents around:
@@ -120,20 +124,20 @@ def showSource():
 
 def changeAPI():
         # Create input dialogue for new API keys
-        global APIinpit
+        global APIinput
         APIinput = Tk()
         APIinput.title("New API keys")
         # Text:
-        Label(APIinput, text="Please enter new Dropbox API details below\n https://www.dropbox.com/developers/apps).").grid(row=0, column=0, columnspan=2, sticky=W)
-        Label(APIinput, text="API Key: ").grid(row=1, column=0)
-        Label(APIinput, text="API Secret: ").grid(row=2, column=0)
+        Label(APIinput, text="Please enter new Dropbox API details below\n (https://www.dropbox.com/developers/apps).").grid(row=0, column=0, columnspan=2, sticky=W)
+        Label(APIinput, text="App Key: ").grid(row=1, column=0)
+        Label(APIinput, text="App Secret: ").grid(row=2, column=0)
         # Data entry text boxes:
         keyEntry = Entry(APIinput)
         secretEntry = Entry(APIinput)
         keyEntry.grid(row=1, column=1)
         secretEntry.grid(row=2, column=1)
         # Button:
-        submitButton = Button(APIinput, text="OK", width=10, command=lambda: APIsetup(['SAVE', keyEntry.get(), secretEntry.get()]))
+        submitButton = Button(APIinput, text="OK", width=10, command=lambda: APIsetup(['SAVE', keyEntry.get().strip(), secretEntry.get().strip()]))
         submitButton.grid(row=3, column=1, pady=4, padx=8, sticky=E)
         # Start focus on entry box & set Enter to trigger button's function
         keyEntry.focus_force()
@@ -141,38 +145,86 @@ def changeAPI():
         
         mainloop()
 
-def confirmAPI():
+def confirmAPI(account):
     # Confirm entry of API keys & close entry dialogue
     global APIinput
-    confirmationMessage = "API keys changed"
-    selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
-    if selection == 'yes':
-        APIinput.destroy()
+    confirmationMessage = "API keys changed, now saving data to the account '%s'." % account
+    tkMessageBox.showinfo("Dropbox Link", confirmationMessage)
+    APIinput.destroy()
+
+def setClient(app_key, app_secret, code):
+        global client
+        global APIauth
+        flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app_key, app_secret)
+        access_token, user_id = flow.finish(code)
+        # Store account link for later use
+        client = dropbox.client.DropboxClient(access_token)
+        APIauth.destroy()
 
 def APIsetup(settings):
     # Load or save API keys based on settings - ['SAVE'/'LOAD', API KEY, API SECRET]
+    global APIauth
     if settings[0] == 'SAVE':
         app_key = settings[1]
         app_secret = settings[2]
+        
+        # Dropbox authorisation process
+        flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app_key, app_secret)
+        authorise_url = flow.start()
+
+        # Authorisation code input dialogue:
+        APIauth = Tk()
+        APIauth.title('Authorise access')
+        Label(APIauth, text="To complete setup, please visit the link below and authorise Team Trade's \naccess to your Dropbox folders.", justify=LEFT).grid(row=0, column=0, columnspan=3, sticky=W)
+        urlTextBox = Text(APIauth, height=3, width=50)
+        urlTextBox.insert(INSERT, authorise_url)
+        urlTextBox.grid(row=1,column=0, columnspan=3)
+        Label(APIauth, text="Enter the Authorisation code below:").grid(row=2, column=0, sticky=W)
+        authEntry = Entry(APIauth, width=66)
+        authEntry.grid(row=3, column=0, columnspan=3, pady=4)
+        submitButton = Button(APIauth, text="Authorise", width=10, command=lambda: setClient(app_key, app_secret, authEntry.get().strip()))
+        submitButton.grid(row=4, column=2, pady=4, padx=8, sticky=E)
+        mainloop()
+
+        ## NOTES
+        # Although the Dropbox link seems to work, this set of dialogue boxes does not.
+        # It also feels a bit awkward, so a new solution may be needed
+        
         saveFile = open(APIfile, 'wb')
-        pickle.dump({'KEY' : app_key, 'SECRET' : app_secret}, saveFile)
+        pickle.dump({'KEY' : app_key, 'SECRET' : app_secret, 'CODE' : authEntry.get.strip()}, saveFile)
         saveFile.close()
-        confirmAPI()
+        
+        confirmAPI(client.account_info()['display_name'])
+
         
     if settings[0] == 'LOAD':
+        # Retrieve previously entered API details
         loadFile = (APIfile, 'r')
         APIdetails = pickle.load(APIfile)
         app_key = APIdetails['KEY']
         app_secret = APIdetails['SECRET']
+        code = APIdetails['CODE']
         loadFile.close()
         
-    return dropbox.client.DropboxOAuth2FlowNoRedirect(app_key, app_secret)
+        # Link to dropbox account
+        flow = dropbox.client.DropboxOAuth2FlowNoRedirect(app_key, app_secret)
+        access_token, user_id = flow.finish(code)
+        client = dropbox.client.DropboxClient(access_token)
+
 
 def downloadData():
     # Retrieve trade data from shared source & store in a list for use by the program
     global systemData
 
+
+    if os.path.exists(APIfile):
+        APIsetup(['LOAD','','']) # Load API details (saved to global 'client' variable
+    else:
+        changeAPI() # Dropbox link hasn't been set up, do it now
+        
     # DOWNLOAD CODE GOES HERE
+    #
+    #
 
     if os.path.exists(filename): # Check if the trade data file exists (if not, it is created when the program is closed)
         loadFile = open(filename, 'r')
