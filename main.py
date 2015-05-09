@@ -9,10 +9,13 @@ import ttk
 import os       # Used for loading & saving files
 import sys      # For safely exiting the program
 import pickle   # To save & load data to .txt files
+# For saving data online:
+import dropbox
 
 # Global window variables so they can be opened & closed from different modules:
 mainWindow = 0 
 stationInput = 0
+APIinput = 0
 contextMenu = 0
 
 # Global list of systems & commodities to save having to pass their contents around:
@@ -26,8 +29,8 @@ defaultComm = [u'Explosives=0', u'Hydrogen Fuel=0', u'Mineral Oil=0', u'Pesticid
 
 # Name & location of file full of commodity data.
 filename = 'trade_data.txt'
-# UP/DOWNLOAD URL GOES HERE
-URL = ''
+# Dropbox API keys stored in this file
+APIfile = 'API.txt'
 
 def version():
         # Version info & eventually help text/instructions.
@@ -115,6 +118,55 @@ def showSource():
     sourceURL = version()[2]
     print "\nThis tool is open source & the code can be viewed at\n%s" % sourceURL
 
+def changeAPI():
+        # Create input dialogue for new API keys
+        global APIinpit
+        APIinput = Tk()
+        APIinput.title("New API keys")
+        # Text:
+        Label(APIinput, text="Please enter new Dropbox API details below\n https://www.dropbox.com/developers/apps).").grid(row=0, column=0, columnspan=2, sticky=W)
+        Label(APIinput, text="API Key: ").grid(row=1, column=0)
+        Label(APIinput, text="API Secret: ").grid(row=2, column=0)
+        # Data entry text boxes:
+        keyEntry = Entry(APIinput)
+        secretEntry = Entry(APIinput)
+        keyEntry.grid(row=1, column=1)
+        secretEntry.grid(row=2, column=1)
+        # Button:
+        submitButton = Button(APIinput, text="OK", width=10, command=lambda: APIsetup(['SAVE', keyEntry.get(), secretEntry.get()]))
+        submitButton.grid(row=3, column=1, pady=4, padx=8, sticky=E)
+        # Start focus on entry box & set Enter to trigger button's function
+        keyEntry.focus_force()
+        APIinput.bind('<Return>', (lambda event: APIsetup(['SAVE', keyEntry.get(), secretEntry.get()])))
+        
+        mainloop()
+
+def confirmAPI():
+    # Confirm entry of API keys & close entry dialogue
+    global APIinput
+    confirmationMessage = "API keys changed"
+    selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
+    if selection == 'yes':
+        APIinput.destroy()
+
+def APIsetup(settings):
+    # Load or save API keys based on settings - ['SAVE'/'LOAD', API KEY, API SECRET]
+    if settings[0] == 'SAVE':
+        app_key = settings[1]
+        app_secret = settings[2]
+        saveFile = open(APIfile, 'wb')
+        pickle.dump({'KEY' : app_key, 'SECRET' : app_secret}, saveFile)
+        saveFile.close()
+        confirmAPI()
+        
+    if settings[0] == 'LOAD':
+        loadFile = (APIfile, 'r')
+        APIdetails = pickle.load(APIfile)
+        app_key = APIdetails['KEY']
+        app_secret = APIdetails['SECRET']
+        loadFile.close()
+        
+    return dropbox.client.DropboxOAuth2FlowNoRedirect(app_key, app_secret)
 
 def downloadData():
     # Retrieve trade data from shared source & store in a list for use by the program
@@ -263,7 +315,7 @@ def UImenu():
 
     # Settings menu
     settingsMenu = Menu(menubar, tearoff=0)
-    settingsMenu.add_command(label="Change upload URL", command=changeURL)
+    settingsMenu.add_command(label="Change up/download location", command=changeAPI)
     menubar.add_cascade(label="Settings", menu=settingsMenu)
 
     # Info menu
@@ -298,7 +350,7 @@ def saveChange():
         systemData[currentStationSelection][1] = [] # Fetch from 'commodity' list the selected station's data
         for line in commodity.get(0,END):
                 # Loop through textbox contents
-                name, info = line.split("       ")
+                name, info = line.split("\t\t")
                 
                 # Convert user-fiendly supply/demand names back to integers
                 if info == "(HS)":
@@ -319,11 +371,11 @@ def saveChange():
         
 
 def saveData(tradeData):
-        # Save data to file & upload it
-        saveFile = open(filename, 'w', 0)
-        pickle.dump(tradeData, saveFile) # Each station is saved on a new line
-        saveFile.close
-        uploadData()
+    # Save data to file & upload it
+    saveFile = open(filename, 'w', 0)
+    pickle.dump(tradeData, saveFile) # Each station is saved on a new line
+    saveFile.close
+    uploadData()
 
 
 def showCommodities(station):
@@ -355,62 +407,62 @@ def showCommodities(station):
                 if info == -3:
                         info = "HD"
                 # Add commodity to the end of the list
-                commodity.insert(END, "%s       (%s)" % (name, info))
+                commodity.insert(END, "%s\t\t(%s)" % (name, info))
 
         showTrades(systemData[currentStationSelection][1])
 
 def popup(event):
-        # This lets the right click emnu pop up over the main window
-        contextMenu.tk_popup(event.x_root, event.y_root, 0)
+    # This lets the right click emnu pop up over the main window
+    contextMenu.tk_popup(event.x_root, event.y_root, 0)
         
 def changeStatus(newStatus):
-        # Change supply/demand of selected commodity & save data
-        original = commodity.get(commodity.curselection()[0],None) # Get current selection text
-        originalName = original.split('       ')[0] # Discard all but the name
-        commodity.insert(commodity.curselection()[0], '%s       (%s)' % (originalName, newStatus)) # Insert original name with new status
-        commodity.delete(commodity.curselection()[0],last=None) # Delete old entry
-        saveChange()
+    # Change supply/demand of selected commodity & save data
+    original = commodity.get(commodity.curselection()[0],None) # Get current selection text
+    originalName = original.split('\t\t')[0] # Discard all but the name
+    commodity.insert(commodity.curselection()[0], '%s\t\t(%s)' % (originalName, newStatus)) # Insert original name with new status
+    commodity.delete(commodity.curselection()[0],last=None) # Delete old entry
+    saveChange()
         
 def addStation():
-        # Add new system/station to list
-        global systemData
-        global stationInput
+    # Add new system/station to list
+    global systemData
+    global stationInput
 
-        # Create input dialogue:
-        stationInput = Tk()
-        stationInput.title("New Station")
-        # Text:
-        Label(stationInput, text="Please enter new Station details below.").grid(row=0, column=0, columnspan=2)
-        Label(stationInput, text="System: ").grid(row=1, column=0)
-        Label(stationInput, text="Station: ").grid(row=2, column=0)
-        # Data entry text boxes:
-        sysEntry = Entry(stationInput)
-        staEntry = Entry(stationInput)
-        sysEntry.grid(row=1, column=1)
-        staEntry.grid(row=2, column=1)
-        # Button:
-        submitButton = Button(stationInput, text="Add", width=10, command=lambda: updateStationList([sysEntry.get(), staEntry.get()]))
-        submitButton.grid(row=3, column=1, pady=4, padx=8, sticky=E)
-        # Start focus on entry box & set Enter to trigger button's function
-        sysEntry.focus_force()
-        stationInput.bind('<Return>', (lambda event: updateStationList([sysEntry.get(), staEntry.get()])))
+    # Create input dialogue:
+    stationInput = Tk()
+    stationInput.title("New Station")
+    # Text:
+    Label(stationInput, text="Please enter new Station details below.").grid(row=0, column=0, columnspan=2)
+    Label(stationInput, text="System: ").grid(row=1, column=0)
+    Label(stationInput, text="Station: ").grid(row=2, column=0)
+    # Data entry text boxes:
+    sysEntry = Entry(stationInput)
+    staEntry = Entry(stationInput)
+    sysEntry.grid(row=1, column=1)
+    staEntry.grid(row=2, column=1)
+    # Button:
+    submitButton = Button(stationInput, text="Add", width=10, command=lambda: updateStationList([sysEntry.get(), staEntry.get()]))
+    submitButton.grid(row=3, column=1, pady=4, padx=8, sticky=E)
+    # Start focus on entry box & set Enter to trigger button's function
+    sysEntry.focus_force()
+    stationInput.bind('<Return>', (lambda event: updateStationList([sysEntry.get(), staEntry.get()])))
         
-        mainloop()     
+    mainloop()     
 
 
 def updateStationList(details):
-        systemData.append(["%s - %s" % (details[0], details[1]), defaultComm])
-        updateSystems()
-        stationInput.destroy()
+    systemData.append(["%s - %s" % (details[0], details[1]), defaultComm])
+    updateSystems()
+    stationInput.destroy()
 
 def delStation(index):
-        # Delete system/station from list
-        global systemData
-        confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData[index][0])
-        selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
-        if selection == 'yes':
-                del systemData[index]
-                updateSystems()
+    # Delete system/station from list
+    global systemData
+    confirmationMessage = "Are you sure you want to delete all data for this station?\n'%s'" % (systemData[index][0])
+    selection = tkMessageBox.askquestion("Delete Station", confirmationMessage, icon='warning')
+    if selection == 'yes':
+        del systemData[index]
+        updateSystems()
 
 def showTrades(localData):
         # Recieves commodity list for local station & displays potential destinations

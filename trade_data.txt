@@ -113,7 +113,7 @@ aVHydrogen Fuel=0
 p58
 aVMineral Oil=0
 p59
-aVPesticides=0
+aVPesticides=2
 p60
 aVClothing=0
 p61
